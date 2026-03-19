@@ -1,3 +1,4 @@
+const { admin, db } = require("./firebase"); 
 const express = require("express");
 const cors = require("cors");
 const nodemailer = require("nodemailer");
@@ -23,6 +24,16 @@ app.post("/api/contact", async (req, res) => {
       return res.status(400).json({ message: "All fields are required." });
     }
 
+    const docRef = await db.collection("messages").add({
+      name,
+      email,
+      message,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      status: "new",
+      source: "portfolio-contact-form",
+      autoReplySent: false
+    });
+
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
@@ -42,6 +53,10 @@ app.post("/api/contact", async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
+
+    await docRef.update({
+      status: "emailed"
+    });
 
     res.status(200).json({ message: "Message sent successfully." });
   } catch (error) {
