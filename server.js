@@ -44,14 +44,10 @@ app.post("/api/contact", async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    await docRef.update({
-      status: "emailed"
-    });
-
-    res.status(200).json({ message: "Message sent successfully." });
+    return res.status(200).json({ message: "Message sent successfully." });
   } catch (error) {
     console.error("EMAIL ERROR:", error);
-    res.status(500).json({ message: "Server error. Message not sent." });
+    return res.status(500).json({ message: "Server error. Message not sent." });
   }
 });
 
